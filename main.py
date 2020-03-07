@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys,time
 from pygame.locals import *
 pygame.init()
 startGame=False
@@ -37,6 +37,7 @@ yellow=(255,255,0)
 blue1=(38,188,213)
 white2=(179,168,150)
 gray=(128,128,128)
+rectExist=True
 #font = pygame.font.SysFont("my_font.ttf", 32)
 font=pygame.font.SysFont('arial',23)
 #font = pygame.font.SysFont(None, 32)
@@ -113,29 +114,44 @@ class rect_class():
 
 def isRectClicked(event):
     global select
-    for i in range(0,10):
-        if rectDirectionay[i].rect.collidepoint(event.pos):
-            select =rectDirectionay[i]
+    for i in range(0,rectNumber-5):
+        if i!=10:
+            if rectDirectionay[i].rect.collidepoint(event.pos):
+                select =rectDirectionay[i]
 
 def openTheDoor():
-    if rect[9].positionX==110 and rect[9].positionY==310:
+    global rectNumber,rectExist,gameOverTime,isGameOver,gameLastTime
+    if rect[9].rect.left==110 and rect[9].rect.top==310 and rectExist==True:
         del rect[15]
+        isGameOver =True
+        rectExist=False
+        rectNumber-=1
+        gameOverTime=time.time()
+        gameLastTime=gameOverTime - gameStartTime
+def whenGameOver():
+    if isGameOver:
+        drawText('time:'+str(format(gameLastTime,'.1f')+' s'),font,display,20,20,white)
 def drawText(text, font, surface, x, y,color):
     textobj = font.render(text, 1, color)
     textrect = textobj.get_rect()
     textrect.topleft = (x, y)
     surface.blit(textobj, textrect)
+gameStartTime=time.time()
+gameLastTime=0
+isGameOver=False
 for i in range(rectNumber):
     rect[i]=rect_class(rectSize[i],rectColor[i],everyRectPosition[i])
 rectDirectionay=rect
 select=rect[5]
 while True:
     if startGame:
-        display.blit(picture,(-270,11))
-        for i in range(rectNumber-1):
-            rect[i].draw()
+        display.blit(picture,(-270,10))
+        for i in range(rectNumber):
+            if i!=15:
+                rect[i].draw()
         select.move()
         openTheDoor()
+        whenGameOver()
     else:
         #display.blit()
         drawText('Pennant Puzzle', font, display, 135, 0,white)
